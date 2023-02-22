@@ -1,6 +1,7 @@
-import requests
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 import cv2
+from time import sleep
+import sys
 # URLs of the .ts files to download
 
 
@@ -11,11 +12,18 @@ import cv2
 #     with open(f"file{i}.ts", "wb") as f:
 #         print(f"Download : {i}")
 #         f.write(r.content)
-
+def printProgressBar(i,max):
+    n_bar =10 #size of progress bar
+    j= i/max
+    sys.stdout.write('\r')
+    sys.stdout.write(f"[{'=' * int(n_bar * j):{n_bar}s}] {int(100 * j)}% : {counter}")
+    sys.stdout.flush()
 # Merge the .ts files into a single video file
 video_files = []
 for i in range(1, 742):
     video_files.append(f"seg-{i}-v1-a1.ts")
+
+max = len(video_files)
 
 print("Videos Files Length: ",len(video_files))
 
@@ -24,7 +32,7 @@ width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 cap.release()
 out = cv2.VideoWriter('merged_video.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (width, height))
-
+counter = 0
 for file in video_files:
     cap = cv2.VideoCapture(file)
     while True:
@@ -32,6 +40,8 @@ for file in video_files:
         if not ret:
             break
         out.write(frame)
+    counter = counter + 1
+    printProgressBar(counter,max)
     cap.release()
 
 # Release the video writer object
